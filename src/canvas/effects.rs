@@ -79,13 +79,12 @@ impl DropShadow {
 fn blur(pixmap: &mut Pixmap, blur_x: f32, blur_y: f32) {
     let w = pixmap.width() as usize;
     let h = pixmap.height() as usize;
-    let pixels = pixmap
-        .pixels()
-        .iter()
-        .map(|color| [color.red(), color.green(), color.blue(), color.alpha()])
-        .collect::<Vec<_>>();
-
     let data = pixmap.data_mut();
+    let mut pixels = Vec::with_capacity(w * h);
+    for mut i in 0..(data.len() / 4) {
+        i *= 4;
+        pixels.push([data[i], data[i + 1], data[i + 2], data[i + 3]]);
+    }
     for i in 0..4 {
         let mut pixels = pixels
             .iter()
