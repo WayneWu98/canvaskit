@@ -1,4 +1,3 @@
-use image::Rgb;
 use serde::Deserialize;
 use tiny_skia::{FillRule, Paint, Path, PathBuilder, Pixmap, Shader, Transform};
 use wasm_bindgen_test::console_log;
@@ -11,11 +10,13 @@ use crate::{
     utils::{self, make_error, AppResult},
 };
 
+use super::Draw;
+
 #[derive(Deserialize, Debug, Clone)]
 pub struct Rectangle {
     pub corner: Option<Corner>,
     pub color: color::Color,
-    pub shadow: Option<effects::Shadow>,
+    pub shadow: Option<effects::BoxShadow>,
     pub position: Position,
     pub size: Size,
     pub border: Option<Border>,
@@ -74,14 +75,8 @@ impl Corner {
     }
 }
 
-// #[derive(Deserialize, Serialize, Debug, Clone)]
-// pub struct Border {
-//     pub width: f32,
-//     pub color:
-// }
-
-impl Rectangle {
-    pub fn draw(&self, pixmap: &mut Pixmap) -> AppResult {
+impl Draw for Rectangle {
+    fn draw(&self, pixmap: &mut Pixmap) -> AppResult {
         let path = self.get_path()?;
         let paint = self.get_paint()?;
         if let Some(shadow) = self.shadow {
@@ -99,7 +94,9 @@ impl Rectangle {
         }
         Ok(())
     }
+}
 
+impl Rectangle {
     pub fn get_paint(&self) -> AppResult<Paint> {
         let mut paint = utils::create_paint();
         paint.shader = match self.color.clone() {

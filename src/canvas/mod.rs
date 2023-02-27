@@ -2,6 +2,7 @@ pub mod color;
 pub mod effects;
 pub mod matrix;
 
+use crate::graphic::Draw;
 use serde::{Deserialize, Serialize};
 use tiny_skia::{FillRule, Paint, PathBuilder, Pixmap, Transform};
 use wasm_bindgen::JsValue;
@@ -58,10 +59,7 @@ impl Canvas {
     }
 
     pub fn draw(&mut self, graphic: Graphic) -> AppResult {
-        match graphic {
-            Graphic::Rectangle(rectangle) => rectangle.draw(&mut self.pixmap),
-            _ => Ok(()),
-        }
+        graphic.draw(&mut self.pixmap)
     }
 
     pub fn export(&self) -> AppResult<Vec<u8>> {

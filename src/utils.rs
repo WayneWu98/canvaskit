@@ -1,7 +1,10 @@
 use std::fmt::Display;
 
-use crate::color;
-use tiny_skia::{Paint, Shader};
+use crate::{
+    color,
+    matrix::{Position, Size},
+};
+use tiny_skia::{Paint, Pixmap, Shader, Transform};
 use wasm_bindgen::JsValue;
 
 pub type AppResult<T = ()> = Result<T, AppError>;
@@ -43,6 +46,22 @@ pub fn min<T: std::cmp::PartialOrd + From<u8> + Copy>(nums: &[T]) -> T {
         }
     }
     v
+}
+
+pub fn create_empty_pixmap(w: u32, h: u32) -> AppResult<Pixmap> {
+    Pixmap::new(w, h).map_or(Err(make_error("create pixmap fail!")), |v| Ok(v))
+}
+
+pub fn merge_pixmap(a: &mut Pixmap, b: &Pixmap, offset: Option<Position>) {
+    let Position(x, y) = offset.or(Some(Position(0., 0.))).unwrap();
+    a.draw_pixmap(
+        x as i32,
+        y as i32,
+        b.as_ref(),
+        &tiny_skia::PixmapPaint::default(),
+        Transform::identity(),
+        None,
+    );
 }
 
 pub fn create_paint() -> Paint<'static> {
