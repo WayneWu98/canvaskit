@@ -7,7 +7,7 @@ use crate::{
     drawing::shader::{self, create_linear_gradient},
     effects,
     matrix::*,
-    utils::{self, make_error, merge_pixmap, AppResult},
+    utils::{self, make_error, AppResult},
 };
 
 use super::Draw;
@@ -55,19 +55,9 @@ impl Draw for Line {
             None,
         );
         if let Some(shadow) = self.shadow {
-            g_pixmap = shadow.draw(g_pixmap)?;
+            shadow.draw(pixmap, &g_pixmap)?;
         }
-        merge_pixmap(pixmap, &g_pixmap, None);
-        // pixmap.stroke_path(
-        //     &path,
-        //     &paint,
-        //     &Stroke {
-        //         width: self.width,
-        //         ..Stroke::default()
-        //     },
-        //     Transform::default(),
-        //     None,
-        // );
+        utils::merge_pixmap(pixmap, &g_pixmap, None);
         Ok(())
     }
 }

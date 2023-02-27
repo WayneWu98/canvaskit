@@ -20,7 +20,7 @@ init('./pkg/canvaskit_bg.wasm')
       background: { type: 'Rgba', value: [255, 255, 0, 100] },
       "graphics": [
         // { "type": "Rectangle", "value": { "color": { "type": "Rgba", "value": [255, 0, 0, 120] }, "position": [30, 30], "size": [400, 400] } },
-        { "type": "Line", "value": { "color": [255, 0, 0, 120], "from": [30, 30], "to": [400, 400], width: 10, shadow: { x: 220, y: 10, blur: 10, color: [0, 255, 0, 200] } } },
+        { "type": "Line", "value": { "color": [255, 0, 0, 120], "from": [30, 30], "to": [400, 400], width: 10, shadow: { x: 0, y: 10, blur: 10, color: [0, 255, 0, 200] } } },
         { "type": "Rectangle", 
         "value": { 
           "corner": new Array(4).fill(r), 

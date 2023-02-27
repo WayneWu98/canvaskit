@@ -51,22 +51,7 @@ impl BoxShadow {
             Transform::identity(),
             None,
         );
-        let w = blurred.width() as usize;
-        let h = blurred.height() as usize;
-        let pixels = blurred
-            .pixels()
-            .iter()
-            .map(|color| [color.red(), color.green(), color.blue(), color.alpha()])
-            .collect::<Vec<_>>();
-        let pixels = blur(pixels, w, h, self.blur, self.blur);
-        let data = blurred.data_mut();
-        for (mut i, [r, g, b, a]) in pixels.into_iter().enumerate() {
-            i *= 4;
-            data[i] = r;
-            data[i + 1] = g;
-            data[i + 2] = b;
-            data[i + 3] = a;
-        }
+        blur(&mut blurred, self.blur, self.blur);
         utils::merge_pixmap(pixmap, &blurred, None);
         Ok(())
     }
@@ -81,53 +66,35 @@ pub struct DropShadow {
 }
 
 impl DropShadow {
-    pub fn draw(&self, pixmap: Pixmap) -> AppResult<Pixmap> {
-        let mut graphic_pixmap = pixmap.clone();
-        let w = graphic_pixmap.width() as usize;
-        let h = graphic_pixmap.height() as usize;
-        let pixels = graphic_pixmap
-            .pixels()
-            .iter()
-            .map(|color| [color.red(), color.green(), color.blue(), color.alpha()])
-            .collect::<Vec<_>>();
-        let pixels = blur(pixels, w, h, self.blur, self.blur);
-        let data = graphic_pixmap.data_mut();
-        for (mut i, [r, g, b, a]) in pixels.into_iter().enumerate() {
-            i *= 4;
-            data[i] = r;
-            data[i + 1] = g;
-            data[i + 2] = b;
-            data[i + 3] = a;
-        }
-
-        // Transform::from_translate(self.x, self.y).map_points(pixmap.pixels_mut());
-        utils::merge_pixmap(&mut graphic_pixmap, &pixmap, Some(Position(self.x, self.y)));
-        Ok(graphic_pixmap)
+    pub fn draw(&self, pixmap: &mut Pixmap, parent: &Pixmap) -> AppResult {
+        let w = pixmap.width();
+        let h = pixmap.height();
+        let mut shadow_pixmap = utils::create_empty_pixmap(w, h)?;
+        utils::merge_pixmap(&mut shadow_pixmap, parent, Some(Position(self.x, self.y)));
+        blur(&mut shadow_pixmap, self.blur, self.blur);
+        utils::merge_pixmap(pixmap, &shadow_pixmap, None);
+        Ok(())
     }
 }
 
-fn blur(
-    mut data: Vec<[u8; 4]>,
-    width: usize,
-    height: usize,
-    blur_x: f32,
-    blur_y: f32,
-) -> Vec<[u8; 4]> {
+fn blur(pixmap: &mut Pixmap, blur_x: f32, blur_y: f32) {
+    let w = pixmap.width() as usize;
+    let h = pixmap.height() as usize;
+    let pixels = pixmap
+        .pixels()
+        .iter()
+        .map(|color| [color.red(), color.green(), color.blue(), color.alpha()])
+        .collect::<Vec<_>>();
+
+    let data = pixmap.data_mut();
     for i in 0..4 {
-        let mut pixels = data
+        let mut pixels = pixels
             .iter()
             .map(|item| *item.get(i).unwrap())
             .collect::<Vec<_>>();
-        fastblur::gaussian_blur_asymmetric_single_channel(
-            &mut pixels,
-            width,
-            height,
-            blur_x,
-            blur_y,
-        );
+        fastblur::gaussian_blur_asymmetric_single_channel(&mut pixels, w, h, blur_x, blur_y);
         for (j, pixel) in pixels.into_iter().enumerate() {
-            data[j][i] = pixel;
+            data[j * 4 + i] = pixel;
         }
     }
-    data
 }
