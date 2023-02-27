@@ -5,7 +5,7 @@ pub mod text;
 
 use std::f32::consts::PI;
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use tiny_skia::{Paint, Path, Pixmap, Point, Shader};
 
 use crate::{

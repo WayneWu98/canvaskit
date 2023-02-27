@@ -10,7 +10,7 @@ use wasm_bindgen::prelude::*;
 
 pub use canvas::{color, effects, matrix};
 
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 #[wasm_bindgen]
 pub fn draw(val: String) -> Result<Vec<u8>, JsValue> {

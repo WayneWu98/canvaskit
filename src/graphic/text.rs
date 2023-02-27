@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Text {}
 
 impl Text {}

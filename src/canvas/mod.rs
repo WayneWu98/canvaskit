@@ -3,7 +3,7 @@ pub mod effects;
 pub mod matrix;
 
 use crate::graphic::Draw;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use tiny_skia::{FillRule, Paint, PathBuilder, Pixmap, Transform};
 use wasm_bindgen::JsValue;
 
