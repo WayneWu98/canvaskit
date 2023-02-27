@@ -4,7 +4,9 @@ use tiny_skia::{GradientStop, LinearGradient, Point, Shader, Transform};
 use wasm_bindgen_test::console_log;
 
 use crate::{
-    graphics::{ColorStop, Corner, GradientStopPosition, Position, Size},
+    color,
+    graphic::rectangle::Corner,
+    matrix::*,
     utils::{make_error, AppResult},
 };
 
@@ -13,7 +15,7 @@ pub fn create_linear_gradient<'a>(
     Position(x, y): Position,
     Size(w, h): Size,
     corner: Corner,
-    colors: Vec<ColorStop>,
+    colors: Vec<color::ColorStop>,
 ) -> AppResult<Shader<'a>> {
     let Corner(c0, c1, c2, c3) = corner.get_fitted(&(w, h).into());
     let (mid_w, mid_h) = (w / 2., h / 2.);
@@ -73,10 +75,10 @@ pub fn create_linear_gradient<'a>(
         .iter()
         .map(|color| {
             let pos = match color.position {
-                GradientStopPosition::Percent(p) => p,
-                GradientStopPosition::Pixel(p) => p / distance,
+                color::GradientStopPosition::Percent(p) => p,
+                color::GradientStopPosition::Pixel(p) => p / distance,
             };
-            let (r, g, b, a) = color.color;
+            let color::Rgba(r, g, b, a) = color.color;
             GradientStop::new(pos, tiny_skia::Color::from_rgba8(r, g, b, a))
         })
         .collect();

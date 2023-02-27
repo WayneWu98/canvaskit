@@ -16,7 +16,7 @@ init('./pkg/canvaskit_bg.wasm')
     console.time('draw')
     const r = 9999
     const options = JSON.stringify({
-      size: [800, 800],
+      size: [1000, 1000],
       background: { type: 'Rgba', value: [255, 255, 0, 0] },
       "graphics": [
         // { "type": "Rectangle", "value": { "corner": [9999, 9999, 9999, 9999], "color": { "type": "Rgba", "value": [255, 0, 0, 120] }, "position": [30, 30], "size": [400, 400] } },
@@ -30,7 +30,19 @@ init('./pkg/canvaskit_bg.wasm')
               stops: [{ position: { type: 'Percent', value: 0 }, color: [245, 224, 20, 255] }, { position: { type: 'Percent', value: 1 }, color: [190, 122, 240, 255] }]
             }
           },
-          "position": [0, 0], "size": [800, 800] } },
+          "position": [20, 20], "size": [600, 600],
+          border: {
+            width: 8,
+            color: [245, 245, 254,  255],
+          },
+          shadow: {
+            x: 0,
+            y: 0,
+            spread: 20,
+            blur: 10,
+            color: [255, 0, 0, 255],
+          }
+        } },
       ]
     })
     // const buff = canvas.draw(options)

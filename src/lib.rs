@@ -1,45 +1,20 @@
 #![allow(unused_variables, unused_imports)]
 mod canvas;
 mod drawing;
-mod graphics;
+mod graphic;
 mod utils;
-use graphics::{Color, Graphic, Position, Size};
+use canvas::CanvasConfiguration;
 use tiny_skia::Pixmap;
 use utils::{make_error, AppResult};
 use wasm_bindgen::prelude::*;
 
-use serde::{Deserialize, Serialize};
+pub use canvas::{color, effects, matrix};
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct CanvasBuilder {
-    pub size: Size,
-    pub background: Color,
-    pub graphics: Vec<Graphic>,
-}
+use serde::{Deserialize, Serialize};
 
 #[wasm_bindgen]
 pub fn draw(val: String) -> Result<Vec<u8>, JsValue> {
-    let CanvasBuilder {
-        size,
-        background,
-        graphics,
-    }: CanvasBuilder = serde_json::from_str(&val).map_err(|_| make_error("invalid options"))?;
-
-    let mut cvs = canvas::Canvas::new(size)?;
-    cvs.draw_rectangle(Graphic::Rectangle {
-        corner: None,
-        color: background,
-        shadow: None,
-        position: (0., 0.).into(),
-        size,
-    })?;
-    for graphic in graphics {
-        match graphic {
-            // Graphic::Rectangle => cvs.draw_rectangle(graphic)?,
-            Graphic::Rectangle { .. } => cvs.draw_rectangle(graphic)?,
-            _ => (),
-        };
-    }
+    let cvs = CanvasConfiguration::try_from(val)?.build()?;
     return Ok(cvs.export()?);
 }
 

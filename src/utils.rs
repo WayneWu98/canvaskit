@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use crate::color;
+use tiny_skia::{Paint, Shader};
 use wasm_bindgen::JsValue;
 
 pub type AppResult<T = ()> = Result<T, AppError>;
@@ -41,4 +43,16 @@ pub fn min<T: std::cmp::PartialOrd + From<u8> + Copy>(nums: &[T]) -> T {
         }
     }
     v
+}
+
+pub fn create_paint() -> Paint<'static> {
+    let mut paint = Paint::default();
+    paint.anti_alias = true;
+    paint
+}
+
+pub fn create_rgba_paint(color: color::Rgba) -> Paint<'static> {
+    let mut paint = create_paint();
+    paint.shader = Shader::SolidColor(color.into());
+    paint
 }
