@@ -24,20 +24,17 @@ impl BoxShadow {
             .transform(Transform::from_translate(self.x, self.y))
             .unwrap_or_else(|| path.clone());
         let bounds = path.bounds();
+        let cx = bounds.x() + bounds.width() / 2.;
+        let cy = bounds.y() + bounds.height() / 2.;
         let w = bounds.width();
         let h = bounds.height();
         let sx = (w + self.spread) / w;
         let sy = (h + self.spread) / h;
         let path = path
             .clone()
-            .transform(Transform::from_row(
-                sx,
-                0.,
-                0.,
-                sy,
-                -self.spread / 2.,
-                -self.spread / 2.,
-            ))
+            .transform(Transform::from_translate(-cx, -cy))
+            .and_then(|path| path.transform(Transform::from_scale(sx, sy)))
+            .and_then(|path| path.transform(Transform::from_translate(cx, cy)))
             .unwrap_or_else(|| path.clone());
         let mut blurred = Pixmap::new(pixmap.width(), pixmap.height())
             .map_or(Err(make_error("create pixmap fail!!")), |v| Ok(v))?;
