@@ -8,7 +8,7 @@ use tiny_skia::Pixmap;
 use utils::{make_error, AppResult};
 use wasm_bindgen::prelude::*;
 
-pub use canvas::{color, effects, matrix};
+pub use canvas::{color, effects, font, matrix};
 
 use serde::Deserialize;
 

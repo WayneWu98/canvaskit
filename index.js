@@ -11,34 +11,37 @@ function arrayBufferToBase64(buffer) {
 }
 
 init('./pkg/canvaskit_bg.wasm')
-  .then(() => {
+  .then(() => fetch('public/xiaowei.ttf'))
+  .then(res => res.arrayBuffer())
+  .then(xiaowei => {
     console.log('init finished')
     console.time('draw')
     const r = 9999
     const options = JSON.stringify({
       size: [1000, 1000],
       background: { type: 'Rgba', value: [255, 255, 0, 100] },
+      fontSet: { xiaowei: Array.from(new Uint8Array(xiaowei)) },
       "graphics": [
         // { "type": "Rectangle", "value": { "color": { "type": "Rgba", "value": [255, 0, 0, 120] }, "position": [30, 30], "size": [400, 400] } },
         { "type": "Line", "value": { "color": [255, 0, 0, 120], "from": [30, 30], "to": [400, 400], width: 10, shadow: { x: 0, y: 10, blur: 10, color: [0, 255, 0, 200] } } },
         { "type": "Rectangle", 
         "value": { 
-          "corner": new Array(4).fill(r), 
+          // "corner": new Array(4).fill(r), 
           "color": { 
             "type": "Gradient", 
             "value": { 
               angle: 225, 
-              stops: [{ position: { type: 'Percent', value: 0 }, color: [245, 224, 20, 255] }, { position: { type: 'Percent', value: 1 }, color: [190, 122, 240, 255] }]
+              stops: [{ position: { type: 'Percent', value: 0 }, color: [245, 224, 20, 80] }, { position: { type: 'Percent', value: 1 }, color: [190, 122, 240, 80] }]
             }
           },
-          "position": [80, 200], "size": [600, 600],
-          // shadow: {
-          //   x: 0,
-          //   y: 0,
-          //   spread: 20,
-          //   blur: 10,
-          //   color: [255, 0, 0, 100],
-          // }
+          "position": [80, 200], "size": [200, 200],
+          shadow: {
+            x: 0,
+            y: 0,
+            spread: 100,
+            blur: 0,
+            color: [255, 0, 0, 255],
+          }
         } },
 
       ]
