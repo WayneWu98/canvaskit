@@ -1,6 +1,5 @@
 use serde::Deserialize;
 use tiny_skia::{FillRule, Paint, Path, PathBuilder, Pixmap, Shader, Stroke, Transform};
-use wasm_bindgen_test::console_log;
 
 use crate::{
     color,

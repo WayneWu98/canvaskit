@@ -1,7 +1,6 @@
 use std::f32::consts::PI;
 
 use tiny_skia::{GradientStop, LinearGradient, Point, Shader, Transform};
-use wasm_bindgen_test::console_log;
 
 use crate::{
     color,

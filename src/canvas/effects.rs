@@ -1,7 +1,6 @@
 use fastblur::{gaussian_blur_asymmetric, gaussian_blur_asymmetric_single_channel};
 use serde::Deserialize;
 use tiny_skia::{FillRule, Paint, Path, Pixmap, Transform};
-use wasm_bindgen_test::console_log;
 
 use crate::{
     color,
