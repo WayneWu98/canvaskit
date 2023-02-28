@@ -1,0 +1,1 @@
+![layout-calculation](assets/layout-calculation.png)
