@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 use crate::graphic::Draw;
 use serde::Deserialize;
-use tiny_skia::{FillRule, Paint, PathBuilder, Pixmap, Transform};
+use tiny_skia::{FillRule, Paint, PathBuilder, Pixmap, Rect, Transform};
 use wasm_bindgen::JsValue;
 
 use crate::{
@@ -44,13 +44,19 @@ impl CanvasConfiguration {
             init_fonts(font_set)?;
         }
         let mut canvas = Canvas::new(self.size)?;
-        canvas.draw(Graphic::Rectangle(Rectangle {
-            color: self.background,
-            size: self.size,
-            ..Rectangle::default()
-        }))?;
+        let mut bounds = Rect::from_xywh(0., 0., self.size.width(), self.size.height())
+            .map_or(Err(make_error("create bounds fail!!")), |v| Ok(v))?;
+        canvas.draw(
+            Graphic::Rectangle(Rectangle {
+                color: self.background,
+                size: Some(self.size),
+                ..Rectangle::default()
+            }),
+            bounds.clone(),
+            None,
+        )?;
         for graphic in self.graphics {
-            canvas.draw(graphic)?;
+            bounds = canvas.draw(graphic, bounds, None)?;
         }
         Ok(canvas)
     }
@@ -63,13 +69,18 @@ pub struct Canvas {
 impl Canvas {
     pub fn new(size: Size) -> AppResult<Self> {
         Ok(Self {
-            pixmap: Pixmap::new(size.0 as u32, size.1 as u32)
+            pixmap: Pixmap::new(size.width() as u32, size.height() as u32)
                 .map_or(Err(make_error("init pixmap fail!")), |v| Ok(v))?,
         })
     }
 
-    pub fn draw(&mut self, graphic: Graphic) -> AppResult {
-        graphic.draw(&mut self.pixmap)
+    pub fn draw(
+        &mut self,
+        mut graphic: Graphic,
+        bounds: Rect,
+        layout_bounds: Option<Box<Rect>>,
+    ) -> AppResult<Rect> {
+        graphic.draw(&mut self.pixmap, bounds, layout_bounds)
     }
 
     pub fn export(&self) -> AppResult<Vec<u8>> {

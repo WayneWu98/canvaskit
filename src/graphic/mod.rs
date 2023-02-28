@@ -6,7 +6,7 @@ pub mod text;
 use std::f32::consts::PI;
 
 use serde::Deserialize;
-use tiny_skia::{Paint, Path, Pixmap, Point, Shader};
+use tiny_skia::{Paint, Path, Pixmap, Point, Rect, Shader};
 
 use crate::{
     color,
@@ -16,7 +16,12 @@ use crate::{
 };
 
 pub trait Draw {
-    fn draw(&self, pixmap: &mut Pixmap) -> AppResult;
+    fn draw(
+        &mut self,
+        pixmap: &mut Pixmap,
+        bounds: Rect,
+        layout_bounds: Option<Box<Rect>>,
+    ) -> AppResult<Rect>;
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -28,11 +33,16 @@ pub enum Graphic {
 }
 
 impl Draw for Graphic {
-    fn draw(&self, pixmap: &mut Pixmap) -> AppResult {
+    fn draw(
+        &mut self,
+        pixmap: &mut Pixmap,
+        bounds: Rect,
+        layout_bounds: Option<Box<Rect>>,
+    ) -> AppResult<Rect> {
         match self {
-            Graphic::Rectangle(rect) => rect.draw(pixmap),
-            Graphic::Line(line) => line.draw(pixmap),
-            _ => Ok(()),
+            Graphic::Rectangle(rect) => rect.draw(pixmap, bounds, layout_bounds),
+            Graphic::Line(line) => line.draw(pixmap, bounds, layout_bounds),
+            _ => Ok(Rect::from_xywh(0., 0., 0., 0.).unwrap()),
         }
     }
 }

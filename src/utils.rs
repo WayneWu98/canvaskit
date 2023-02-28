@@ -4,10 +4,24 @@ use crate::{
     color,
     matrix::{Position, Size},
 };
-use tiny_skia::{Paint, Pixmap, Shader, Transform};
+use tiny_skia::{Paint, Pixmap, Rect, Shader, Transform};
 use wasm_bindgen::JsValue;
 
 pub type AppResult<T = ()> = Result<T, AppError>;
+
+pub trait Union {
+    fn union(&self, rect: &Rect) -> Rect;
+}
+
+impl Union for Rect {
+    fn union(&self, rect: &Rect) -> Rect {
+        let l = min(&[self.left(), rect.left()]);
+        let t = min(&[self.top(), rect.top()]);
+        let r = max(&[self.right(), rect.right()]);
+        let b = max(&[self.bottom(), rect.bottom()]);
+        Rect::from_ltrb(l, t, r, b).unwrap_or(self.clone())
+    }
+}
 
 #[derive(Debug)]
 pub struct AppError {
@@ -48,12 +62,24 @@ pub fn min<T: std::cmp::PartialOrd + From<u8> + Copy>(nums: &[T]) -> T {
     v
 }
 
+pub fn max<T: std::cmp::PartialOrd + From<u8> + Copy>(nums: &[T]) -> T {
+    let mut v: T = *nums.get(0).unwrap();
+    for num in nums {
+        if num.gt(&v) {
+            v = *num;
+        }
+    }
+    v
+}
+
 pub fn create_empty_pixmap(w: u32, h: u32) -> AppResult<Pixmap> {
     Pixmap::new(w, h).map_or(Err(make_error("create pixmap fail!")), |v| Ok(v))
 }
 
 pub fn merge_pixmap(a: &mut Pixmap, b: &Pixmap, offset: Option<Position>) {
-    let Position(x, y) = offset.or(Some(Position(0., 0.))).unwrap();
+    let position = offset.or(Some(Position::default())).unwrap();
+    let x = position.x();
+    let y = position.y();
     a.draw_pixmap(
         x as i32,
         y as i32,

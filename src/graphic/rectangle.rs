@@ -1,24 +1,29 @@
 use serde::Deserialize;
-use tiny_skia::{FillRule, Paint, Path, PathBuilder, Pixmap, Shader, Transform};
+use tiny_skia::{FillRule, Paint, Path, PathBuilder, Pixmap, Rect, Shader, Transform};
+use wasm_bindgen_test::console_log;
 
 use crate::{
     color,
     drawing::shader::{self, create_linear_gradient},
     effects,
     matrix::*,
-    utils::{self, make_error, AppResult},
+    utils::{self, make_error, AppResult, Union},
 };
 
-use super::Draw;
+use super::{Draw, Graphic};
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Rectangle {
     pub corner: Option<Corner>,
     pub color: color::Color,
     pub shadow: Option<effects::BoxShadow>,
-    pub position: Position,
-    pub size: Size,
+    pub position: Option<Position>,
+    pub size: Option<Size>,
     pub border: Option<Border>,
+    pub children: Option<Vec<Graphic>>,
+    pub padding: Option<Padding>,
+    #[serde(skip)]
+    pub layout_bounds: Option<Box<Rect>>,
 }
 
 impl Default for Rectangle {
@@ -27,9 +32,12 @@ impl Default for Rectangle {
             corner: None,
             color: color::Color::Rgba(color::Rgba(255, 255, 255, 255)),
             shadow: None,
-            position: Position(0., 0.),
-            size: Size(0., 0.),
+            position: Some((0., 0.).into()),
+            size: Some((0., 0.).into()),
             border: None,
+            children: None,
+            padding: None,
+            layout_bounds: None,
         }
     }
 }
@@ -62,7 +70,9 @@ impl Default for Corner {
 }
 
 impl Corner {
-    pub fn get_fitted(&self, Size(w, h): &Size) -> Self {
+    pub fn get_fitted(&self, Size { width, height }: &Size) -> Self {
+        let w = width.unwrap_or(0.);
+        let h = height.unwrap_or(0.);
         let mc_x = w / 2.;
         let mc_y = h / 2.;
         Corner(
@@ -75,9 +85,31 @@ impl Corner {
 }
 
 impl Draw for Rectangle {
-    fn draw(&self, pixmap: &mut Pixmap) -> AppResult {
-        let path = self.get_path()?;
-        let paint = self.get_paint()?;
+    fn draw(
+        &mut self,
+        pixmap: &mut Pixmap,
+        bounds: Rect,
+        layout_bounds: Option<Box<Rect>>,
+    ) -> AppResult<Rect> {
+        self.layout_bounds = layout_bounds;
+        let mut children_bounds = self.child_layout_bounds(Some(&bounds));
+        let mut children_pixmap = utils::create_empty_pixmap(pixmap.width(), pixmap.height())?;
+        if let Some(children) = self.children.take() {
+            let mut child_bounds = children_bounds.clone();
+            for mut graphic in children {
+                let nb = graphic.draw(
+                    &mut children_pixmap,
+                    child_bounds,
+                    Some(Box::new(self.child_layout_bounds(Some(&bounds)))),
+                )?;
+                child_bounds =
+                    Rect::from_xywh(nb.left() + nb.width(), nb.top() + nb.height(), 0., 0.)
+                        .unwrap_or(nb);
+                children_bounds = children_bounds.union(&child_bounds);
+            }
+        }
+        let path = self.get_path(&children_bounds)?;
+        let paint = self.get_paint(&children_bounds)?;
         if let Some(shadow) = self.shadow {
             shadow.draw(pixmap, &path)?;
         }
@@ -91,23 +123,29 @@ impl Draw for Rectangle {
         if let Some(border) = self.border {
             border.draw(pixmap, &path)?;
         }
-        Ok(())
+        utils::merge_pixmap(pixmap, &mut children_pixmap, None);
+        Ok(path.bounds())
     }
 }
 
 impl Rectangle {
-    pub fn get_paint(&self) -> AppResult<Paint> {
+    pub fn get_paint(&self, bounds: &Rect) -> AppResult<Paint> {
         let mut paint = utils::create_paint();
         paint.shader = match self.color.clone() {
             color::Color::Rgba(color::Rgba(r, g, b, a)) => {
                 Shader::SolidColor(tiny_skia::Color::from_rgba8(r, g, b, a))
             }
             color::Color::Gradient(color::LinearGradient { angle, stops }) => {
+                let x = self.x(Some(bounds));
+                let y = self.y(Some(bounds));
+                let w = self.width(Some(bounds));
+                let h = self.height(Some(bounds));
+
                 create_linear_gradient(
                     angle,
-                    self.position,
-                    self.size,
-                    self.corner(),
+                    (x, y).into(),
+                    (w, h).into(),
+                    self.corner(bounds),
                     stops.clone(),
                 )?
             }
@@ -115,14 +153,14 @@ impl Rectangle {
         Ok(paint)
     }
 
-    pub fn get_path(&self) -> AppResult<Path> {
-        let Rectangle {
-            size: Size(w, h),
-            position: Position(x, y),
-            ..
-        } = self.clone();
+    pub fn get_path(&self, bounds: &Rect) -> AppResult<Path> {
+        let Rectangle { size, position, .. } = self.clone();
+        let x = self.x(Some(bounds));
+        let y = self.y(Some(bounds));
+        let w = self.width(Some(bounds));
+        let h = self.height(Some(bounds));
         let mut pb = PathBuilder::new();
-        let Corner(c0, c1, c2, c3) = self.corner();
+        let Corner(c0, c1, c2, c3) = self.corner(bounds);
         let (mid_x, mid_y) = (x + w / 2., y + h / 2.);
         let (max_x, max_y) = (x + w, y + h);
         pb.move_to(x, mid_y);
@@ -170,7 +208,64 @@ impl Rectangle {
             .map_or(Err(make_error("path generation fail!")), |v| Ok(v))
     }
 
-    pub fn corner(&self) -> Corner {
-        self.corner.unwrap_or_default().get_fitted(&self.size)
+    pub fn corner(&self, bounds: &Rect) -> Corner {
+        self.corner
+            .unwrap_or_default()
+            .get_fitted(&(self.width(Some(bounds)), self.height(Some(bounds))).into())
+    }
+
+    pub fn x(&self, bounds: Option<&Rect>) -> f32 {
+        if let Some(ref position) = self.position {
+            if let Some(ref x) = position.x {
+                return *x
+                    + self
+                        .layout_bounds
+                        .clone()
+                        .and_then(|r| Some(r.left()))
+                        .unwrap_or(0.);
+            }
+        }
+        return bounds.and_then(|v| Some(v.left())).unwrap_or(0.);
+    }
+    pub fn y(&self, bounds: Option<&Rect>) -> f32 {
+        if let Some(ref position) = self.position {
+            if let Some(ref y) = position.y {
+                return *y
+                    + self
+                        .layout_bounds
+                        .clone()
+                        .and_then(|r| Some(r.top()))
+                        .unwrap_or(0.);
+            }
+        }
+        return bounds.and_then(|v| Some(v.top())).unwrap_or(0.);
+    }
+    pub fn padding(&self) -> Padding {
+        self.padding.unwrap_or_default()
+    }
+    pub fn width(&self, bounds: Option<&Rect>) -> f32 {
+        if let Some(ref size) = self.size {
+            if let Some(ref w) = size.width {
+                return *w;
+            }
+        }
+        return bounds.and_then(|v| Some(v.width())).unwrap_or(0.)
+            + self.padding().left()
+            + self.padding().right();
+    }
+    pub fn height(&self, bounds: Option<&Rect>) -> f32 {
+        if let Some(ref size) = self.size {
+            if let Some(ref h) = size.height {
+                return *h;
+            }
+        }
+        return bounds.and_then(|v| Some(v.height())).unwrap_or(0.)
+            + self.padding().top()
+            + self.padding().bottom();
+    }
+    fn child_layout_bounds(&self, bounds: Option<&Rect>) -> Rect {
+        let x = self.x(bounds) + self.padding().left();
+        let y = self.y(bounds) + self.padding().top();
+        Rect::from_xywh(x, y, 0., 0.).unwrap()
     }
 }

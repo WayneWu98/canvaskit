@@ -66,7 +66,7 @@ impl DropShadow {
         let w = pixmap.width();
         let h = pixmap.height();
         let mut shadow_pixmap = utils::create_empty_pixmap(w, h)?;
-        utils::merge_pixmap(&mut shadow_pixmap, parent, Some(Position(self.x, self.y)));
+        utils::merge_pixmap(&mut shadow_pixmap, parent, Some((self.x, self.y).into()));
         blur(&mut shadow_pixmap, self.blur, self.blur);
         utils::merge_pixmap(pixmap, &shadow_pixmap, None);
         Ok(())

@@ -23,7 +23,7 @@ impl Default for Arc {
         Self {
             radius: 0.,
             color: color::Rgba(0, 0, 0, 255),
-            position: Position(0., 0.),
+            position: Position::default(),
             width: 1.,
         }
     }

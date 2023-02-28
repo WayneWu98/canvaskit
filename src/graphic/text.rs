@@ -16,12 +16,12 @@ pub struct Text {
     pub font: String,
 }
 
-impl Draw for Text {
-    fn draw(&self, pixmap: &mut tiny_skia::Pixmap) -> AppResult {
-        let w = pixmap.width();
-        let h = pixmap.height();
-        let graphic = utils::create_empty_pixmap(w, h)?;
+// impl Draw for Text {
+//     fn draw(&self, pixmap: &mut tiny_skia::Pixmap) -> AppResult {
+//         let w = pixmap.width();
+//         let h = pixmap.height();
+//         let graphic = utils::create_empty_pixmap(w, h)?;
 
-        todo!()
-    }
-}
+//         todo!()
+//     }
+// }

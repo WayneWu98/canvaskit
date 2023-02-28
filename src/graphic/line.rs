@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use tiny_skia::{FillRule, Paint, Path, PathBuilder, Pixmap, Shader, Stroke, Transform};
+use tiny_skia::{FillRule, Paint, Path, PathBuilder, Pixmap, Rect, Shader, Stroke, Transform};
 
 use crate::{
     color,
@@ -23,8 +23,8 @@ pub struct Line {
 impl Default for Line {
     fn default() -> Self {
         Self {
-            from: Position(0., 0.),
-            to: Position(0., 0.),
+            from: Position::default(),
+            to: Position::default(),
             width: 1.,
             color: color::Rgba(0, 0, 0, 255),
             shadow: None,
@@ -33,10 +33,15 @@ impl Default for Line {
 }
 
 impl Draw for Line {
-    fn draw(&self, pixmap: &mut Pixmap) -> AppResult {
+    fn draw(
+        &mut self,
+        pixmap: &mut Pixmap,
+        bounds: Rect,
+        layout_bounds: Option<Box<Rect>>,
+    ) -> AppResult<Rect> {
         let mut pb = PathBuilder::default();
-        pb.move_to(self.from.0, self.from.1);
-        pb.line_to(self.to.0, self.to.1);
+        pb.move_to(self.from.x(), self.from.y());
+        pb.line_to(self.to.x(), self.to.y());
         let path = pb
             .finish()
             .map_or(Err(make_error("create path fail!!")), |v| Ok(v))?;
@@ -57,6 +62,6 @@ impl Draw for Line {
             shadow.draw(pixmap, &g_pixmap)?;
         }
         utils::merge_pixmap(pixmap, &g_pixmap, None);
-        Ok(())
+        Ok(path.bounds().into())
     }
 }

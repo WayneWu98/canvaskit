@@ -11,11 +11,15 @@ use crate::{
 
 pub fn create_linear_gradient<'a>(
     mut angle: f32,
-    Position(x, y): Position,
-    Size(w, h): Size,
+    position: Position,
+    size: Size,
     corner: Corner,
     colors: Vec<color::ColorStop>,
 ) -> AppResult<Shader<'a>> {
+    let x = position.x();
+    let y = position.y();
+    let w = size.width();
+    let h = size.height();
     let Corner(c0, c1, c2, c3) = corner.get_fitted(&(w, h).into());
     let (mid_w, mid_h) = (w / 2., h / 2.);
     let lt = Point::from_xy(x, y);
