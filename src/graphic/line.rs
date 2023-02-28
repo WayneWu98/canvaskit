@@ -18,6 +18,8 @@ pub struct Line {
     pub width: f32,
     pub color: color::Rgba,
     pub shadow: Option<effects::DropShadow>,
+    #[serde(skip)]
+    pub layout_bounds: Option<Box<Rect>>,
 }
 
 impl Default for Line {
@@ -28,6 +30,7 @@ impl Default for Line {
             width: 1.,
             color: color::Rgba(0, 0, 0, 255),
             shadow: None,
+            layout_bounds: None,
         }
     }
 }
@@ -39,9 +42,10 @@ impl Draw for Line {
         bounds: Rect,
         layout_bounds: Option<Box<Rect>>,
     ) -> AppResult<Rect> {
+        self.layout_bounds = layout_bounds;
         let mut pb = PathBuilder::default();
-        pb.move_to(self.from.x(), self.from.y());
-        pb.line_to(self.to.x(), self.to.y());
+        pb.move_to(self.from().x(), self.from().y());
+        pb.line_to(self.to().x(), self.to().y());
         let path = pb
             .finish()
             .map_or(Err(make_error("create path fail!!")), |v| Ok(v))?;
@@ -63,5 +67,20 @@ impl Draw for Line {
         }
         utils::merge_pixmap(pixmap, &g_pixmap, None);
         Ok(path.bounds().into())
+    }
+}
+
+impl Line {
+    fn from(&self) -> Position {
+        if let Some(ref lb) = self.layout_bounds {
+            return (self.from.x() + lb.left(), self.from.y() + lb.top()).into();
+        }
+        self.from
+    }
+    fn to(&self) -> Position {
+        if let Some(ref lb) = self.layout_bounds {
+            return (self.to.x() + lb.left(), self.to.y() + lb.top()).into();
+        }
+        self.to
     }
 }

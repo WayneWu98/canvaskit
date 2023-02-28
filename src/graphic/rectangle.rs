@@ -264,8 +264,11 @@ impl Rectangle {
             + self.padding().bottom();
     }
     fn child_layout_bounds(&self, bounds: Option<&Rect>) -> Rect {
-        let x = self.x(bounds) + self.padding().left();
-        let y = self.y(bounds) + self.padding().top();
-        Rect::from_xywh(x, y, 0., 0.).unwrap()
+        let p = self.padding();
+        let l = self.x(bounds) + p.left();
+        let t = self.y(bounds) + p.top();
+        let r = self.x(bounds) + self.width(None) - p.right();
+        let b = self.y(bounds) + self.height(None) - p.bottom();
+        Rect::from_ltrb(l, t, r, b).unwrap()
     }
 }
