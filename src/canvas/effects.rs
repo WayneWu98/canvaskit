@@ -1,11 +1,17 @@
 use fastblur::{gaussian_blur_asymmetric, gaussian_blur_asymmetric_single_channel};
 use serde::Deserialize;
-use tiny_skia::{FillRule, Paint, Path, Pixmap, Transform};
+use tiny_skia::{
+    BlendMode, FillRule, FilterQuality, Paint, Path, Pixmap, PixmapPaint, PremultipliedColorU8,
+    Rect, Shader, Transform,
+};
+use wasm_bindgen_test::console_log;
 
 use crate::{
-    color,
+    color, empty_pixmap, expand_pixmap,
     matrix::Position,
+    merge_pixmap, rgba_paint,
     utils::{self, make_error, AppResult},
+    xywh_rect,
 };
 
 #[derive(Deserialize, Debug, Clone, Copy)]
@@ -18,7 +24,7 @@ pub struct BoxShadow {
 }
 
 impl BoxShadow {
-    pub fn draw(&self, pixmap: &mut Pixmap, path: &Path) -> AppResult {
+    pub fn draw(&self, mut pixmap: Pixmap, path: &Path) -> AppResult<Pixmap> {
         let path = path
             .clone()
             .transform(Transform::from_translate(self.x, self.y))
@@ -36,20 +42,20 @@ impl BoxShadow {
             .and_then(|path| path.transform(Transform::from_scale(sx, sy)))
             .and_then(|path| path.transform(Transform::from_translate(cx, cy)))
             .unwrap_or_else(|| path.clone());
-        let mut blurred = Pixmap::new(pixmap.width(), pixmap.height())
-            .map_or(Err(make_error("create pixmap fail!!")), |v| Ok(v))?;
+        let bounds = path.bounds();
+        let mut blurred =
+            empty_pixmap!(bounds.right() + self.spread, bounds.bottom() + self.spread);
 
         blurred.fill(tiny_skia::Color::from_rgba8(0, 0, 0, 0));
         blurred.fill_path(
             &path,
-            &utils::create_rgba_paint(self.color),
+            &rgba_paint!(self.color),
             FillRule::Winding,
             Transform::identity(),
             None,
         );
         blur(&mut blurred, self.blur, self.blur);
-        utils::merge_pixmap(pixmap, &blurred, None);
-        Ok(())
+        Ok(merge_pixmap!(pixmap, blurred))
     }
 }
 
@@ -62,14 +68,24 @@ pub struct DropShadow {
 }
 
 impl DropShadow {
-    pub fn draw(&self, pixmap: &mut Pixmap, parent: &Pixmap) -> AppResult {
-        let w = pixmap.width();
-        let h = pixmap.height();
-        let mut shadow_pixmap = utils::create_empty_pixmap(w, h)?;
-        utils::merge_pixmap(&mut shadow_pixmap, parent, Some((self.x, self.y).into()));
+    pub fn draw(&self, mut pixmap: Pixmap) -> AppResult<Pixmap> {
+        let w = pixmap.width() as f32 + self.blur + self.x;
+        let h = pixmap.height() as f32 + self.blur + self.y;
+        let mut shadow_pixmap = expand_pixmap!(xywh_rect!(0., 0., w, h), pixmap.clone());
+        let pixels = shadow_pixmap.pixels_mut();
+        for i in 0..pixels.len() {
+            let color::Rgba(r, g, b, a) = self.color;
+            let a = (pixels[i].alpha() as f32 * a as f32 / 255.) as u8;
+            pixels[i] = tiny_skia::ColorU8::from_rgba(r, g, b, a).premultiply();
+        }
         blur(&mut shadow_pixmap, self.blur, self.blur);
-        utils::merge_pixmap(pixmap, &shadow_pixmap, None);
-        Ok(())
+        Ok(merge_pixmap!(
+            pixmap,
+            shadow_pixmap,
+            self.x,
+            self.y,
+            BlendMode::DestinationOver
+        ))
     }
 }
 

@@ -4,7 +4,7 @@ use tiny_skia::{GradientStop, LinearGradient, Point, Shader, Transform};
 
 use crate::{
     color,
-    graphic::rectangle::Corner,
+    graphic::container::Corner,
     matrix::*,
     utils::{make_error, AppResult},
 };

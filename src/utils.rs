@@ -19,7 +19,7 @@ impl Union for Rect {
         let t = min(&[self.top(), rect.top()]);
         let r = max(&[self.right(), rect.right()]);
         let b = max(&[self.bottom(), rect.bottom()]);
-        Rect::from_ltrb(l, t, r, b).unwrap_or(self.clone())
+        crate::ltrb_rect!(l, t, r, b)
     }
 }
 
@@ -72,10 +72,6 @@ pub fn max<T: std::cmp::PartialOrd + From<u8> + Copy>(nums: &[T]) -> T {
     v
 }
 
-pub fn create_empty_pixmap(w: u32, h: u32) -> AppResult<Pixmap> {
-    Pixmap::new(w, h).map_or(Err(make_error("create pixmap fail!")), |v| Ok(v))
-}
-
 pub fn merge_pixmap(a: &mut Pixmap, b: &Pixmap, offset: Option<Position>) {
     let position = offset.or(Some(Position::default())).unwrap();
     let x = position.x();
@@ -88,16 +84,4 @@ pub fn merge_pixmap(a: &mut Pixmap, b: &Pixmap, offset: Option<Position>) {
         Transform::identity(),
         None,
     );
-}
-
-pub fn create_paint() -> Paint<'static> {
-    let mut paint = Paint::default();
-    paint.anti_alias = true;
-    paint
-}
-
-pub fn create_rgba_paint(color: color::Rgba) -> Paint<'static> {
-    let mut paint = create_paint();
-    paint.shader = Shader::SolidColor(color.into());
-    paint
 }

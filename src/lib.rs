@@ -2,6 +2,7 @@
 mod canvas;
 mod drawing;
 mod graphic;
+mod macros;
 mod utils;
 use canvas::CanvasConfiguration;
 use tiny_skia::Pixmap;

@@ -1,9 +1,9 @@
 pub mod arc;
+pub mod container;
 pub mod line;
-pub mod rectangle;
-pub mod text;
+// pub mod text;
 
-use std::f32::consts::PI;
+use std::{f32::consts::PI, ops::Bound};
 
 use serde::Deserialize;
 use tiny_skia::{Paint, Path, Pixmap, Point, Rect, Shader};
@@ -15,34 +15,52 @@ use crate::{
     utils::{self, AppResult},
 };
 
+pub struct DrawResult(pub Pixmap, pub Rect);
+
 pub trait Draw {
     fn draw(
         &mut self,
-        pixmap: &mut Pixmap,
-        bounds: Rect,
-        layout_bounds: Option<Box<Rect>>,
-    ) -> AppResult<Rect>;
+        pixmap: Pixmap,
+        pos_bounds: Rect,
+        layout_bounds: Rect,
+    ) -> AppResult<DrawResult>;
+}
+
+#[derive(Deserialize, Debug, Clone, Copy)]
+pub enum Align {
+    Left,
+    Center,
+    Right,
+}
+
+impl Align {
+    fn x(&self, x: f32, w: f32, bounds: &Rect) -> f32 {
+        match self {
+            Align::Left => bounds.left() + x,
+            Align::Center => bounds.left() + bounds.width() / 2. - w / 2.,
+            Align::Right => bounds.right() - w - x,
+        }
+    }
 }
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "type", content = "value")]
 pub enum Graphic {
     // Text(text::Text),
-    Rectangle(rectangle::Rectangle),
+    Container(container::Container),
     Line(line::Line),
 }
 
 impl Draw for Graphic {
     fn draw(
         &mut self,
-        pixmap: &mut Pixmap,
-        bounds: Rect,
-        layout_bounds: Option<Box<Rect>>,
-    ) -> AppResult<Rect> {
+        pixmap: Pixmap,
+        pos_bounds: Rect,
+        layout_bounds: Rect,
+    ) -> AppResult<DrawResult> {
         match self {
-            Graphic::Rectangle(rect) => rect.draw(pixmap, bounds, layout_bounds),
-            Graphic::Line(line) => line.draw(pixmap, bounds, layout_bounds),
-            _ => Ok(Rect::from_xywh(0., 0., 0., 0.).unwrap()),
+            Graphic::Container(container) => container.draw(pixmap, pos_bounds, layout_bounds),
+            Graphic::Line(line) => line.draw(pixmap, pos_bounds, layout_bounds),
         }
     }
 }

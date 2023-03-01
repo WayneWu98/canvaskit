@@ -19,52 +19,78 @@ init('./pkg/canvaskit_bg.wasm')
     const r = 20
     const options = JSON.stringify({
       size: [1000, 1000],
-      background: { type: 'Rgba', value: [255, 255, 0, 100] },
       fontSet: { xiaowei: Array.from(new Uint8Array(xiaowei)) },
-      "graphics": [
-        // { "type": "Rectangle", "value": { "color": { "type": "Rgba", "value": [255, 0, 0, 120] }, "position": [30, 30], "size": [400, 400] } },
-        // { "type": "Line", "value": { "color": [255, 0, 0, 120], "from": { x: 0, y: 0 }, "to": { x: 500, y: 100 }, width: 10, shadow: { x: 0, y: 10, blur: 10, color: [0, 255, 0, 200] } } },
-        { "type": "Rectangle", 
-        "value": { 
-          "corner": new Array(4).fill(r), 
-          "color": { 
-            "type": "Gradient", 
-            "value": { 
-              angle: 225, 
-              stops: [{ position: { type: 'Percent', value: 0 }, color: [245, 224, 20, 255] }, { position: { type: 'Percent', value: 1 }, color: [190, 122, 240, 255] }]
+      graphic: { 
+        // "corner": new Array(4).fill(r), 
+        "color": { 
+          "type": "Rgba", 
+          "value": [0, 0, 0, 0]
+        },
+        // shadow: { x: 0, y: 0, blur: 10, spread: 20, color: [0, 255, 0, 255] },
+        "position": { x: 0, y: 0 },
+        "size": { width: 800 },
+        color: {
+          type: "Rgba",
+          value: [244, 24, 12, 50],
+        },
+        padding: [24, 24, 24, 24],
+        children: [
+          // {
+          //   type: "Container",
+          //   value: {
+          //     // position: { x: 0, y: 0 },
+          //     size: { width: 200, height: 200 },
+          //     color: {
+          //       type: "Rgba",
+          //       value: [255, 0, 255, 255]
+          //     },
+          //     shadow: { x: 0, y: 0, blur: 10, spread: 20, color: [0, 255, 0, 255] },
+          //     align: 'Right'
+          //   }
+          // },
+          // {
+          //   type: 'Container',
+          //   value: {
+          //     position: { x: 0 },
+          //     size: { height: 20 },color: {
+          //       type: "Rgba",
+          //       value: [255, 0, 255, 0]
+          //     },
+          //   }
+          // },
+          {
+            type: "Line",
+            value: {
+              width: 20,
+              color: [0, 0, 0, 255],
+              shadow: { x: 0, y: 0, blur: 20, spread: 10, color: [255, 255, 0, 255] },
+              from: { x: 20, y: 20 },
+              to: { x: 500, y: 80 },
             }
           },
-          shadow: { x: 0, y: 5, blur: 20, spread: 5, color: [0, 255, 0, 255] },
-          "position": { x: 80, y: 200 },
-          // "size": { width: 800, height: 200 },
-          padding: [24, 24, 24, 24],
-          children: [
-            {
-              type: "Rectangle",
-              value: {
-                // position: { x: 0, y: 0 },
-                size: { width: 200, height: 200 },
-                color: {
-                  type: "Rgba",
-                  value: [255, 0, 255, 255]
-                }
-              }
-            },
-            {
-              type: "Rectangle",
-              value: {
-                position: { x: 0 },
-                size: { width: 200, height: 200 },
-                color: {
-                  type: "Rgba",
-                  value: [255, 0, 0, 255]
-                }
-              }
-            },
-          ]
-        } },
-
-      ]
+          // {
+          //   type: 'Container',
+          //   value: {
+          //     position: { x: 0 },
+          //     size: { height: 20 },color: {
+          //       type: "Rgba",
+          //       value: [255, 255, 255, 150]
+          //     },
+          //   }
+          // },
+          // {
+          //   type: "Rectangle",
+          //   value: {
+          //     position: { x: 0 },
+          //     size: { width: 200, height: 200 },
+          //     color: {
+          //       type: "Rgba",
+          //       value: [255, 0, 0, 255]
+          //     }
+          //   }
+          // },
+        ]
+      }
     })
     // const buff = canvas.draw(options)
     const buff = canvas.draw(options)
