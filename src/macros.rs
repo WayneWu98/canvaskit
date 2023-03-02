@@ -59,7 +59,7 @@ macro_rules! merge_pixmap {
         merge_pixmap!($a, $b, 0., 0., $mode, $path)
     };
     ($a: expr, $b: expr, $x: expr, $y: expr, $mode: expr) => {
-        merge_pixmap!($a, $b, 0., 0., $mode, None)
+        merge_pixmap!($a, $b, $x, $y, $mode, None)
     };
     ($a: expr, $b: expr, $x: expr, $y: expr, $mode: expr, $path: expr) => {{
         let aw = $a.width();
