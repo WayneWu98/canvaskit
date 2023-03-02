@@ -53,12 +53,15 @@ macro_rules! empty_pixmap {
 #[macro_export]
 macro_rules! merge_pixmap {
     ($a: expr, $b: expr) => {
-        merge_pixmap!($a, $b, 0., 0., BlendMode::SourceOver)
+        merge_pixmap!($a, $b, 0., 0., BlendMode::SourceOver, None)
     };
-    ($a: expr, $b: expr, $mode: expr) => {
-        merge_pixmap!($a, $b, 0., 0., $mode)
+    ($a: expr, $b: expr, $mode: expr, $path: expr) => {
+        merge_pixmap!($a, $b, 0., 0., $mode, $path)
     };
-    ($a: expr, $b: expr, $x: expr, $y: expr, $mode: expr) => {{
+    ($a: expr, $b: expr, $x: expr, $y: expr, $mode: expr) => {
+        merge_pixmap!($a, $b, 0., 0., $mode, None)
+    };
+    ($a: expr, $b: expr, $x: expr, $y: expr, $mode: expr, $path: expr) => {{
         let aw = $a.width();
         let ah = $a.height();
         let bw = $b.width();
@@ -69,13 +72,51 @@ macro_rules! merge_pixmap {
             quality: FilterQuality::Nearest,
         };
         let transform = Transform::identity();
+        let mut mask;
+        let mut option_mask = None;
         if (bw > aw || bh > ah) {
             let mut new_pixmap = crate::empty_pixmap!(aw.max(bw), ah.max(bh));
+            if let Some(path) = $path {
+                mask = tiny_skia::ClipMask::new();
+                mask.set_path(
+                    new_pixmap.width(),
+                    new_pixmap.height(),
+                    path,
+                    tiny_skia::FillRule::EvenOdd,
+                    true,
+                );
+                option_mask = Some(&mask)
+            }
             new_pixmap.draw_pixmap(0, 0, $a.as_ref(), &paint, transform, None);
-            new_pixmap.draw_pixmap($x as i32, $y as i32, $b.as_ref(), &paint, transform, None);
+            new_pixmap.draw_pixmap(
+                $x as i32,
+                $y as i32,
+                $b.as_ref(),
+                &paint,
+                transform,
+                option_mask,
+            );
             new_pixmap
         } else {
-            $a.draw_pixmap($x as i32, $y as i32, $b.as_ref(), &paint, transform, None);
+            if let Some(path) = $path {
+                mask = tiny_skia::ClipMask::new();
+                mask.set_path(
+                    $a.width(),
+                    $a.height(),
+                    path,
+                    tiny_skia::FillRule::EvenOdd,
+                    true,
+                );
+                option_mask = Some(&mask)
+            }
+            $a.draw_pixmap(
+                $x as i32,
+                $y as i32,
+                $b.as_ref(),
+                &paint,
+                transform,
+                option_mask,
+            );
             $a
         }
     }};

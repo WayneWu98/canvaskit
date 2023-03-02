@@ -27,6 +27,8 @@ pub struct Container {
     pub children: Option<Vec<Graphic>>,
     pub padding: Option<Padding>,
     pub align: Option<Align>,
+    #[serde(default)]
+    pub clip: bool,
     #[serde(skip)]
     children_bounds: Option<Rect>,
     #[serde(skip)]
@@ -48,6 +50,7 @@ impl Default for Container {
             padding: None,
             align: None,
             children_bounds: None,
+            clip: false,
             pos_bounds: None,
             layout_bounds: None,
         }
@@ -94,7 +97,17 @@ impl Draw for Container {
         if let Some(border) = self.border {
             border.draw(&mut pixmap, &path)?;
         }
-
+        if self.clip {
+            return Ok(DrawResult(
+                merge_pixmap!(
+                    pixmap,
+                    children_pixmap,
+                    tiny_skia::BlendMode::SourceOver,
+                    Some(&path)
+                ),
+                bounds,
+            ));
+        }
         Ok(DrawResult(merge_pixmap!(pixmap, children_pixmap), bounds))
     }
 }
