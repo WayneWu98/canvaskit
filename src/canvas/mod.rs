@@ -24,7 +24,6 @@ use self::font::init_fonts;
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct CanvasConfiguration {
-    pub size: Size,
     pub font_set: Option<HashMap<String, Vec<u8>>>,
     pub graphic: graphic::container::Container,
 }
