@@ -18,7 +18,6 @@ init('./pkg/canvaskit_bg.wasm')
     console.time('draw')
     const r = 20
     const options = JSON.stringify({
-      size: [1000, 1000],
       fontSet: { xiaowei: Array.from(new Uint8Array(xiaowei)) },
       graphic: { 
         // "corner": new Array(4).fill(r), 
@@ -28,26 +27,48 @@ init('./pkg/canvaskit_bg.wasm')
         },
         // shadow: { x: 0, y: 0, blur: 10, spread: 20, color: [0, 255, 0, 255] },
         "position": { x: 0, y: 0 },
-        "size": { width: 800 },
+        "size": { width: 1000 },
         color: {
           type: "Rgba",
           value: [244, 24, 12, 50],
         },
+        // clip: true,
         padding: [24, 24, 24, 24],
         children: [
-          // {
-          //   type: "Container",
-          //   value: {
-          //     // position: { x: 0, y: 0 },
-          //     size: { width: 200, height: 200 },
-          //     color: {
-          //       type: "Rgba",
-          //       value: [255, 0, 255, 255]
-          //     },
-          //     shadow: { x: 0, y: 0, blur: 10, spread: 20, color: [0, 255, 0, 255] },
-          //     align: 'Right'
-          //   }
-          // },
+          {
+            type: "Container",
+            value: {
+              position: { x: 200, y: 0 },
+              // size: {  height: 500 },
+              color: {
+                type: "Rgba",
+                value: [255, 0, 255, 255]
+              },
+              corner: [20, 20, 20, 20],
+              shadow: { x: 0, y: 0, blur: 10, spread: 20, color: [0, 255, 0, 255] },
+              align: 'Center',
+              clip: true,
+              padding: [32, 32, 32, 32],
+              children: [
+                {
+                  type: "Container",
+                  value: {
+                    position: { x: 400, y: 0 },
+                    size: { width: 700, height: 600 },
+                    color: {
+                      type: "Rgba",
+                      value: [0, 0, 255, 255]
+                    },
+                    shadow: { x: 0, y: 0, blur: 10, spread: 20, color: [0, 255, 0, 255] },
+                    // align: 'Right'
+                    children: [
+                      
+                    ]
+                  }
+                },
+              ]
+            }
+          },
           // {
           //   type: 'Container',
           //   value: {
@@ -63,7 +84,7 @@ init('./pkg/canvaskit_bg.wasm')
             value: {
               width: 20,
               color: [0, 0, 0, 255],
-              shadow: { x: 0, y: 0, blur: 20, spread: 10, color: [255, 255, 0, 255] },
+              shadow: { x: 80, y: 10, blur: 10, color: [255, 0, 0, 255] },
               from: { x: 20, y: 20 },
               to: { x: 500, y: 80 },
             }

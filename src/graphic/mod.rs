@@ -1,7 +1,7 @@
 pub mod arc;
 pub mod container;
 pub mod line;
-// pub mod text;
+pub mod text;
 
 use std::{f32::consts::PI, ops::Bound};
 
@@ -11,7 +11,7 @@ use tiny_skia::{Paint, Path, Pixmap, Point, Rect, Shader};
 use crate::{
     color,
     drawing::shader::create_linear_gradient,
-    matrix::*,
+    metrics::*,
     utils::{self, AppResult},
 };
 

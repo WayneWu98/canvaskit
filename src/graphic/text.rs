@@ -1,26 +1,32 @@
+use rusttype::Font;
 use serde::Deserialize;
-use tiny_skia::Rect;
+use tiny_skia::{Pixmap, Rect};
 
 use crate::{
     color,
-    matrix::*,
+    metrics::*,
     utils::{self, AppResult},
 };
 
-use super::Draw;
+use super::{Draw, DrawResult};
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct Text {
     pub content: String,
     pub color: color::Rgba,
     pub size: f32,
-    pub font: String,
+    pub font: Option<String>,
     pub line_height: Option<f32>,
     pub position: Option<Position>,
     pub suffix: Option<String>,
-    // pub align
+    #[serde(default)]
+    pub auto_wrap: bool,
+    #[serde(default)]
+    pub align: TextAlign,
     #[serde(skip)]
-    pub layout_bounds: Option<Box<Rect>>,
+    pub pos_bounds: Option<Rect>,
+    #[serde(skip)]
+    pub layout_bounds: Option<Rect>,
 }
 
 #[derive(Deserialize, Debug, Clone)]
@@ -47,11 +53,13 @@ impl Draw for Text {
 
     fn draw(
         &mut self,
-        pixmap: &mut tiny_skia::Pixmap,
-        bounds: tiny_skia::Rect,
-        layout_bounds: Option<Box<tiny_skia::Rect>>,
-    ) -> AppResult<tiny_skia::Rect> {
-        self.layout_bounds = layout_bounds;
+        pixmap: Pixmap,
+        pos_bounds: Rect,
+        layout_bounds: Rect,
+    ) -> AppResult<DrawResult> {
+        self.pos_bounds = Some(pos_bounds);
+        self.layout_bounds = Some(layout_bounds);
+        // if let Some(font) = get_font
         todo!()
     }
 }
@@ -62,5 +70,9 @@ impl Text {
     }
     pub fn line_height(&self) -> f32 {
         self.line_height.unwrap_or(self.size)
+    }
+    pub fn font(&self) -> Option<&'static Font> {
+        let font: &str = if let Some(ref f) = self.font { f } else { "" };
+        crate::font::get_font(font)
     }
 }

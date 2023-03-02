@@ -5,7 +5,7 @@ use crate::{
     color,
     drawing::shader::{self, create_linear_gradient},
     effects,
-    matrix::*,
+    metrics::*,
     utils::{self, make_error, AppResult},
 };
 

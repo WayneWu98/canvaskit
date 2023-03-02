@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::{
     color,
-    matrix::{Position, Size},
+    metrics::{Position, Size},
 };
 use tiny_skia::{Paint, Pixmap, Rect, Shader, Transform};
 use wasm_bindgen::JsValue;

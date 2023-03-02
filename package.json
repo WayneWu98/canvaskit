@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "cargo watch -c -s \"npm run build:wasm\" -w ./src/ -C .",
-    "build:wasm": "wasm-pack build --target web --mode no-install && ls -lh ./pkg"
+    "build:wasm": "wasm-pack build --target web --mode no-install --features default-font && ls -lh ./pkg"
   },
   "keywords": [],
   "author": "",

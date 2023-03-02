@@ -8,9 +8,9 @@ use wasm_bindgen_test::console_log;
 use crate::{
     color,
     drawing::shader::{self, create_linear_gradient},
-    effects, empty_pixmap, empty_rect,
-    matrix::*,
-    merge_pixmap, rgba_paint,
+    effects, empty_pixmap, empty_rect, merge_pixmap,
+    metrics::*,
+    rgba_paint,
     utils::{self, make_error, AppResult},
 };
 

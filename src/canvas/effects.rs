@@ -7,9 +7,9 @@ use tiny_skia::{
 use wasm_bindgen_test::console_log;
 
 use crate::{
-    color, empty_pixmap, expand_pixmap,
-    matrix::Position,
-    merge_pixmap, rgba_paint,
+    color, empty_pixmap, expand_pixmap, merge_pixmap,
+    metrics::Position,
+    rgba_paint,
     utils::{self, make_error, AppResult},
     xywh_rect,
 };

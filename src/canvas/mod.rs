@@ -1,7 +1,7 @@
 pub mod color;
 pub mod effects;
 pub mod font;
-pub mod matrix;
+pub mod metrics;
 
 use std::collections::HashMap;
 
@@ -15,7 +15,7 @@ use wasm_bindgen::JsValue;
 
 use crate::{
     graphic::{self, container::Container, Graphic},
-    matrix::*,
+    metrics::*,
     utils::{self, error_mapper, make_error, AppError, AppResult},
 };
 
