@@ -86,7 +86,7 @@ impl Draw for Container {
         }
         let bounds = path.bounds();
         pixmap = expand_pixmap!(bounds, pixmap);
-        if self.color.is_some() || self.border.is_some() {
+        if self.color.is_some() {
             let paint = self.paint()?;
             pixmap.fill_path(
                 &path,
@@ -95,9 +95,9 @@ impl Draw for Container {
                 Transform::identity(),
                 None,
             );
-            if let Some(border) = self.border {
-                border.draw(&mut pixmap, &path)?;
-            }
+        }
+        if let Some(border) = self.border {
+            border.draw(&mut pixmap, &path)?;
         }
         if self.clip {
             return Ok(DrawResult(
