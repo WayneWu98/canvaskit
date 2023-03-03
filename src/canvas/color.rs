@@ -7,6 +7,12 @@ pub enum Color {
     Gradient(LinearGradient),
 }
 
+impl Default for Color {
+    fn default() -> Self {
+        Self::Rgba(Rgba(0, 0, 0, 0))
+    }
+}
+
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "type", content = "value")]
 pub enum GradientStopPosition {

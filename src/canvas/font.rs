@@ -32,6 +32,6 @@ pub fn init_fonts(fontset: HashMap<String, Vec<u8>>) -> AppResult {
     Ok(())
 }
 
-pub fn get_font(font: &str) -> Option<&'static Font> {
-    unsafe { FONTS.get(font).or(**DEFAULT_FONT.borrow()) }
+pub fn get_font(font: String) -> Option<&'static Font<'static>> {
+    unsafe { FONTS.get(&font).or(**DEFAULT_FONT.borrow()) }
 }

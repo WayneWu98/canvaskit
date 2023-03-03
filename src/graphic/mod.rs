@@ -33,6 +33,12 @@ pub enum Align {
     Right,
 }
 
+impl Default for Align {
+    fn default() -> Self {
+        Align::Left
+    }
+}
+
 impl Align {
     fn x(&self, x: f32, w: f32, bounds: &Rect) -> f32 {
         match self {
@@ -46,7 +52,7 @@ impl Align {
 #[derive(Deserialize, Debug, Clone)]
 #[serde(tag = "type", content = "value")]
 pub enum Graphic {
-    // Text(text::Text),
+    Text(text::Text),
     Container(container::Container),
     Line(line::Line),
 }
@@ -61,6 +67,7 @@ impl Draw for Graphic {
         match self {
             Graphic::Container(container) => container.draw(pixmap, pos_bounds, layout_bounds),
             Graphic::Line(line) => line.draw(pixmap, pos_bounds, layout_bounds),
+            Graphic::Text(text) => text.draw(pixmap, pos_bounds, layout_bounds),
         }
     }
 }
