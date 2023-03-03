@@ -19,7 +19,7 @@ use super::{Align, Draw, DrawResult, Graphic};
 #[derive(Deserialize, Debug, Clone)]
 pub struct Container {
     pub corner: Option<Corner>,
-    pub color: color::Color,
+    pub color: Option<color::Color>,
     pub shadow: Option<effects::BoxShadow>,
     pub position: Option<Position>,
     pub size: Option<Size>,
@@ -41,7 +41,7 @@ impl Default for Container {
     fn default() -> Self {
         Container {
             corner: None,
-            color: color::Color::Rgba(color::Rgba(255, 255, 255, 255)),
+            color: None,
             shadow: None,
             position: Some((0., 0.).into()),
             size: Some((0., 0.).into()),
@@ -81,21 +81,23 @@ impl Draw for Container {
         }
         self.children_bounds = Some(children_bounds);
         let path = self.path()?;
-        let paint = self.paint()?;
         if let Some(shadow) = self.shadow {
             pixmap = shadow.draw(pixmap, &path)?;
         }
         let bounds = path.bounds();
         pixmap = expand_pixmap!(bounds, pixmap);
-        pixmap.fill_path(
-            &path,
-            &paint,
-            FillRule::Winding,
-            Transform::identity(),
-            None,
-        );
-        if let Some(border) = self.border {
-            border.draw(&mut pixmap, &path)?;
+        if self.color.is_some() || self.border.is_some() {
+            let paint = self.paint()?;
+            pixmap.fill_path(
+                &path,
+                &paint,
+                FillRule::Winding,
+                Transform::identity(),
+                None,
+            );
+            if let Some(border) = self.border {
+                border.draw(&mut pixmap, &path)?;
+            }
         }
         if self.clip {
             return Ok(DrawResult(
@@ -115,7 +117,7 @@ impl Draw for Container {
 impl Container {
     pub fn paint(&self) -> AppResult<Paint> {
         let mut paint = paint!();
-        paint.shader = match self.color.clone() {
+        paint.shader = match self.color() {
             color::Color::Rgba(color::Rgba(r, g, b, a)) => {
                 Shader::SolidColor(tiny_skia::Color::from_rgba8(r, g, b, a))
             }
@@ -195,6 +197,14 @@ impl Container {
         self.corner
             .unwrap_or_default()
             .get_fitted(&(self.width(), self.height()).into())
+    }
+
+    pub fn color(&self) -> color::Color {
+        if let Some(ref color) = self.color {
+            color.clone()
+        } else {
+            color::Color::default()
+        }
     }
 
     pub fn x(&self) -> f32 {
