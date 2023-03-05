@@ -14,7 +14,7 @@ pub static mut DEFAULT_FONT: Lazy<Option<&Font<'static>>> = Lazy::new(|| {
 
 #[cfg(feature = "default-font")]
 fn init_default_font() -> Font<'static> {
-    let FONT_DATA: &[u8] = include_bytes!("../../assets/default.ttf");
+    let FONT_DATA: &[u8] = include_bytes!("../../public/xiaowei.ttf");
     Font::try_from_bytes(FONT_DATA).unwrap()
 }
 

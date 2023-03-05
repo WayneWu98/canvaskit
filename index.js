@@ -32,32 +32,32 @@ init('./pkg/canvaskit_bg.wasm')
           type: "Rgba",
           value: [244, 24, 12, 50],
         },
-        clip: true,
+        // clip: true,
         padding: [24, 24, 24, 24],
         children: [
           {
             type: "Container",
             value: {
               position: { x: 200, y: 0 },
-              // size: {  height: 500 },
-              // color: {
-              //   type: "Rgba",
-              //   value: [255, 0, 255, 255]
-              // },
+              size: {  height: 500 },
+              color: {
+                type: "Rgba",
+                value: [255, 0, 255, 255]
+              },
               corner: [20, 20, 20, 20],
               // shadow: { x: 0, y: 0, blur: 10, spread: 20, color: [0, 255, 0, 255] },
               align: 'Center',
-              clip: true,
-              padding: [32, 32, 32, 32],
+              // clip: true,
+              // padding: [32, 32, 32, 32],
               children: [
                 {
                   type: "Container",
                   value: {
-                    position: { x: 0, y: 0 },
-                    size: { width: 1000, height: 600 },
+                    // position: { x: 0, y: 0 },
+                    size: { width: 500, height: 200 },
                     color: {
                       type: "Rgba",
-                      value: [0, 0, 255, 80]
+                      value: [0, 0, 255, 255]
                     },
                     // shadow: { x: 0, y: 0, blur: 10, spread: 20, color: [0, 255, 0, 255] },
                     // align: 'Right'
@@ -70,15 +70,32 @@ init('./pkg/canvaskit_bg.wasm')
                   type: 'Text',
                   value: {
                     content: 'hello, world!',
-                    color: [255, 0, 0, 255],
+                    color: [0, 0, 0, 255],
                     size: 32,
-                    lineHeight: 40,
+                    align: "Left",
+                    lineHeight: 60,
                     position: {
-                      x: 0,
-                      y: 0,
+                      // x: 0,
+                      y: 100,
                     }
                   }
-                }
+                },
+                // {
+                //   type: "Container",
+                //   value: {
+                //     // position: { x: 0, y: 0 },
+                //     size: { width: 500, height: 200 },
+                //     color: {
+                //       type: "Rgba",
+                //       value: [0, 0, 255, 10]
+                //     },
+                //     // shadow: { x: 0, y: 0, blur: 10, spread: 20, color: [0, 255, 0, 255] },
+                //     // align: 'Right'
+                //     children: [
+                      
+                //     ]
+                //   }
+                // },
               ]
             }
           },
@@ -92,16 +109,16 @@ init('./pkg/canvaskit_bg.wasm')
           //     },
           //   }
           // },
-          {
-            type: "Line",
-            value: {
-              width: 20,
-              color: [0, 0, 0, 255],
-              shadow: { x: 80, y: 10, blur: 10, color: [255, 0, 0, 255] },
-              from: { x: 20, y: 20 },
-              to: { x: 500, y: 80 },
-            }
-          },
+          // {
+          //   type: "Line",
+          //   value: {
+          //     width: 20,
+          //     color: [0, 0, 0, 255],
+          //     shadow: { x: 80, y: 10, blur: 10, color: [255, 0, 0, 255] },
+          //     from: { x: 20, y: 20 },
+          //     to: { x: 500, y: 80 },
+          //   }
+          // },
           // {
           //   type: 'Container',
           //   value: {
